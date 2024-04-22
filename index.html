@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <title>Room Dimension Approximator</title>
+</head>
+
+<body>
+    <div id="images-container">
+        <div>
+            <img id="image">
+            <svg id="crop-area" height="0" width="0">
+                <polygon id="crop-coords" points="" />
+            </svg>
+            <div class="crop-point"></div>
+            <div class="crop-point"></div>
+            <div class="crop-point"></div>
+            <div class="crop-point"></div>
+        </div>
+        <div>
+            <img id="cropped">
+            <svg id="distance-line" height="0" width="0">
+                <line id="distance-coords" x1="0" y1="0" x2="0" y2="0" />
+            </svg>
+            <div class="distance-point"></div>
+            <div class="distance-point"></div>
+        </div>
+    </div>
+    <div id="info-container">
+        <form id="image-form">
+            <input id="image-upload" type="file" accept="image/*" required>
+            <div>
+                <input id="cropButton" type="submit" value="Loading...">
+            </div>
+        </form>
+        <div id="distance-container">
+            <div>
+                <label><input id="physical-feet" type="number">ft</label>
+                <label><input id="physical-inches" type="number">in</label>
+            </div>
+            <div>
+                <div id="physical-width">Width:&nbsp; ?</div>
+                <div id="physical-height">Height: ?</div>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+    <script async src="https://docs.opencv.org/4.x/opencv.js" type="text/javascript"></script>
+</body>
+
+</html>
