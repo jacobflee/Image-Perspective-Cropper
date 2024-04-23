@@ -54,6 +54,7 @@ body {
 
 #image-form {
     padding: 8px;
+    padding-top: 0;
     display: flex;
 }
 
