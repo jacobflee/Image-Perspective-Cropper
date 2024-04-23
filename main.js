@@ -4,14 +4,7 @@ const cropPoints = document.querySelectorAll(".crop-point");
 const cropArea = document.getElementById("crop-area");
 const cropCoords = document.getElementById("crop-coords");
 const cropped = document.getElementById("cropped");
-const distancePoints = document.querySelectorAll(".distance-point");
-const distanceLine = document.getElementById("distance-line");
-const distanceCoords = document.getElementById("distance-coords");
 const imageUpload = document.getElementById("image-upload");
-const physicalFeet = document.getElementById("physical-feet");
-const physicalInches = document.getElementById("physical-inches");
-const physicalWidth = document.getElementById("physical-width");
-const physicalHeight = document.getElementById("physical-height");
 const pointRadius = cropPoints[0].clientWidth / 2;
 
 let isDragging = false;
@@ -50,75 +43,18 @@ function resetCropPoints() {
     drawCropArea();
 }
 
+image.onload = () => {
+    cropped.style.visibility = "hidden";
+    cropPoints.forEach(point => point.style.visibility = "visible");
+    cropArea.setAttribute("width", image.clientWidth);
+    cropArea.setAttribute("height", image.clientHeight);
+    resetCropPoints();
+};
+
 imageUpload.onclick = resetCropPoints;
+imageUpload.onchange = (event) => image.src = URL.createObjectURL(event.target.files[0]);
 
-imageUpload.onchange = (event) => {
-    image.src = URL.createObjectURL(event.target.files[0]);
-    image.onload = () => {
-        distancePoints.forEach(point => point.style.visibility = "hidden");
-        cropped.style.visibility = "hidden";
-        distanceLine.style.visibility = "hidden";
-        physicalFeet.value = "";
-        physicalInches.value = "";
-        physicalWidth.innerHTML = "Width:&nbsp; ?";
-        physicalHeight.innerHTML = "Height: ?";
-        cropPoints.forEach(point => point.style.visibility = "visible");
-        cropArea.setAttribute("width", image.clientWidth);
-        cropArea.setAttribute("height", image.clientHeight);
-        resetCropPoints();
-    };
-};
-
-function updateDistanceInfo() {
-    let totalInches = 0;
-    if (physicalFeet.value) totalInches += 12 * parseFloat(physicalFeet.value);
-    if (physicalInches.value) totalInches += parseFloat(physicalInches.value);
-    if (!cropped.clientWidth || cropped.style.visibility == "hidden" || !totalInches) {
-        physicalWidth.innerHTML = "Width:&nbsp; ?";
-        physicalHeight.innerHTML = "Height: ?";
-        return;
-    }
-    const x1 = distanceCoords.getAttribute("x1");
-    const y1 = distanceCoords.getAttribute("y1");
-    const x2 = distanceCoords.getAttribute("x2");
-    const y2 = distanceCoords.getAttribute("y2");
-    const virtualDistance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-    const ratio = totalInches / virtualDistance;
-    const widthInches = Math.round(ratio * cropped.clientWidth);
-    const heightInches = Math.round(ratio * cropped.clientHeight);
-    physicalWidth.innerHTML = "Width:&nbsp; " + Math.floor(widthInches / 12) + "ft " + widthInches % 12 + "in";
-    physicalHeight.innerHTML = "Height: " + Math.floor(heightInches / 12) + "ft " + heightInches % 12 + "in";
-}
-
-function drawLine() {
-    distanceCoords.setAttribute("x1", distancePoints[0].offsetLeft - cropped.offsetLeft + pointRadius);
-    distanceCoords.setAttribute("y1", distancePoints[0].offsetTop - cropped.offsetTop + pointRadius);
-    distanceCoords.setAttribute("x2", distancePoints[1].offsetLeft - cropped.offsetLeft + pointRadius);
-    distanceCoords.setAttribute("y2", distancePoints[1].offsetTop - cropped.offsetTop + pointRadius);
-    if (physicalFeet.value == "" && physicalInches.value == "") return;
-    updateDistanceInfo();
-}
-
-physicalFeet.onchange = updateDistanceInfo;
-physicalInches.onchange = updateDistanceInfo;
-
-cropped.onload = () => {
-    if (cropped.style.visibility == "visible") return;
-    cropped.style.visibility = "visible";
-    distancePoints.forEach(point => point.style.visibility = "visible");
-    distanceLine.style.visibility = "visible";
-    distanceLine.setAttribute("width", cropped.clientWidth);
-    distanceLine.setAttribute("height", cropped.clientHeight);
-    const lineWidth = cropped.clientWidth / 3;
-    let left = cropped.offsetLeft - pointRadius + lineWidth;
-    const top = cropped.offsetTop - pointRadius + cropped.clientHeight / 2;
-    distancePoints[0].style.left = left + "px";
-    distancePoints[0].style.top = top + "px";
-    left += lineWidth;
-    distancePoints[1].style.left = left + "px";
-    distancePoints[1].style.top = top + "px";
-    drawLine();
-};
+cropped.onload = () => cropped.style.visibility = "visible";
 
 function handleStart(event, point) {
     event.preventDefault();
@@ -135,17 +71,11 @@ cropPoints.forEach(point => {
     point.ontouchstart = (event) => handleStart(event, point);
 });
 
-distancePoints.forEach(point => {
-    point.onmousedown = (event) => handleStart(event, point);
-    point.ontouchstart = (event) => handleStart(event, point);
-});
-
 function handleMove(event) {
     if (!isDragging) return;
     const newX = event.clientX - initialX;
     const newY = event.clientY - initialY;
     if (isCropPoint) var selectedImage = image;
-    else var selectedImage = cropped;
     const leftLimit = selectedImage.offsetLeft - pointRadius;
     const rightLimit = leftLimit + selectedImage.clientWidth;
     const topLimit = selectedImage.offsetTop - pointRadius;
@@ -153,7 +83,6 @@ function handleMove(event) {
     selectedPoint.style.left = Math.max(leftLimit, Math.min(newX, rightLimit)) + "px";
     selectedPoint.style.top = Math.max(topLimit, Math.min(newY, bottomLimit)) + "px";
     if (isCropPoint) drawCropArea();
-    else drawLine();
 }
 
 document.onmousemove = handleMove;
