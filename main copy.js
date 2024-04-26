@@ -23,30 +23,22 @@ let initialX;
 let initialY;
 let aspectRatio;
 
-// setting max height for image positioning
-
 imageContainers.forEach(imageContainer => imageContainer.style.maxHeight = maxHeight + "px");
-
-// handling loaders for image input
-
-imageUpload.onclick = resetCropPoints;
-imageUpload.onchange = (event) => { if (event.target.files[0]) image.src = URL.createObjectURL(event.target.files[0]) };
-
-image.onload = () => {
-    fullImage.src = image.src;
-    if (cropped.src) URL.revokeObjectURL(cropped.src);
-    cropped.style.visibility = "hidden";
-    cropped.style.src = "";
-    aspectRatioContainer.style.visibility = "hidden";
-    cropArea.setAttribute("width", image.clientWidth);
-    cropArea.setAttribute("height", image.clientHeight);
-    resetCropPoints();
-}
 
 fullImage.onload = () => { URL.revokeObjectURL(fullImage.src) };
 
+function drawCropArea() {
+    let points = "";
+    cropPoints.forEach(point => {
+        const x = point.offsetLeft - image.offsetLeft + pointRadius;
+        const y = point.offsetTop - image.offsetTop + pointRadius;
+        points += x + "," + y + " ";
+    });
+    points = points.trim();
+    cropCoords.setAttribute("points", points);
+}
+
 function resetCropPoints() {
-    if (!image.src) return;
     const cropAreaWidth = image.clientWidth / 3;
     const cropAreaHeight = image.clientHeight / 3;
     let left = image.offsetLeft - pointRadius + cropAreaWidth;
@@ -61,23 +53,17 @@ function resetCropPoints() {
     drawCropArea();
 }
 
-function drawCropArea() {
-    let points = "";
-    cropPoints.forEach(point => {
-        const x = point.offsetLeft - image.offsetLeft + pointRadius;
-        const y = point.offsetTop - image.offsetTop + pointRadius;
-        points += x + "," + y + " ";
-    });
-    points = points.trim();
-    cropCoords.setAttribute("points", points);
+imageUpload.onclick = resetCropPoints;
+imageUpload.onchange = (event) => { if (event.target.files[0]) image.src = URL.createObjectURL(event.target.files[0]) };
+
+image.onload = () => {
+    fullImage.src = image.src;
+    cropArea.setAttribute("width", image.clientWidth);
+    cropArea.setAttribute("height", image.clientHeight);
+    resetCropPoints();
+    cropped.style.visibility = "hidden";
+    aspectRatioContainer.style.visibility = "hidden";
 }
-
-// handling movement of crop points
-
-cropPoints.forEach(point => {
-    point.onmousedown = handleStart;
-    point.ontouchstart = handleStart;
-});
 
 function handleStart(event) {
     event.preventDefault();
@@ -88,8 +74,10 @@ function handleStart(event) {
     initialY = event.clientY - selectedPoint.offsetTop;
 }
 
-document.onmousemove = handleMove;
-document.ontouchmove = handleMove;
+cropPoints.forEach(point => {
+    point.onmousedown = handleStart;
+    point.ontouchstart = handleStart;
+});
 
 function handleMove(event) {
     if (!isDragging) return;
@@ -105,17 +93,18 @@ function handleMove(event) {
     drawCropArea();
 }
 
+document.onmousemove = handleMove;
+document.ontouchmove = handleMove;
+
 document.onmouseup = () => { isDragging = false };
 document.ontouchend = () => { isDragging = false };
 
-// handle crop
-
 document.getElementById("image-form").onsubmit = (event) => {
     event.preventDefault();
-    const mat = cv.imread(fullImage);
-    const scaleRatio = (mat.cols + mat.rows) / (image.clientWidth + image.clientHeight);
-    const points = cropCoords.getAttribute("points").split(/[\s,]/).map(value => scaleRatio * parseFloat(value));
-    const source = cv.matFromArray(4, 2, cv.CV_32FC1, points);
+    cropImage(false);
+};
+
+function setAspectRatio(points) {
     const w1 = Math.sqrt(Math.pow(points[0] - points[2], 2) + Math.pow(points[1] - points[3], 2));
     const w2 = Math.sqrt(Math.pow(points[4] - points[6], 2) + Math.pow(points[5] - points[7], 2));
     const h1 = Math.sqrt(Math.pow(points[2] - points[4], 2) + Math.pow(points[3] - points[5], 2));
@@ -123,6 +112,14 @@ document.getElementById("image-form").onsubmit = (event) => {
     aspectRatio = (w1 + w2) / (h1 + h2);
     if (aspectRatio > 1) aspectRatioSlider.value = 25 * aspectRatio + 75;
     else aspectRatioSlider.value = 100 * aspectRatio;
+}
+
+function cropImage(aspectRatioIsSet) {
+    const mat = cv.imread(fullImage);
+    const scaleRatio = (mat.cols + mat.rows) / (image.clientWidth + image.clientHeight);
+    const points = cropCoords.getAttribute("points").split(/[\s,]/).map(value => scaleRatio * parseFloat(value));
+    const source = cv.matFromArray(4, 2, cv.CV_32FC1, points);
+    if (!aspectRatioIsSet) setAspectRatio(points);
     const w = aspectRatio < 1 ? mat.rows * aspectRatio : mat.cols;
     const h = aspectRatio < 1 ? mat.rows : mat.cols / aspectRatio;
     const destination = cv.matFromArray(4, 2, cv.CV_32FC1, [0, 0, w, 0, w, h, 0, h]);
@@ -135,24 +132,29 @@ document.getElementById("image-form").onsubmit = (event) => {
     cv.imshow(canvas, mat);
     mat.delete();
     canvas.toBlob(canvasToBlob, "image/webp");
-};
+}
 
 function canvasToBlob(blob) {
     cropped.onload = croppedOnLoad;
-    if (cropped.src) URL.revokeObjectURL(cropped.src);
+    cropped.style.width = "";
+    cropped.style.height = "";
+    URL.revokeObjectURL(cropped.src);
     cropped.src = URL.createObjectURL(blob);
 }
 
 function croppedOnLoad() {
-    cropped.style.width = "";
-    cropped.style.height = "";
-    cropped.style.visibility = "visible";
     aspectRatioContainer.style.visibility = "visible";
+    cropped.style.visibility = "visible";
 }
 
 aspectRatioSlider.addEventListener("input", () => {
     aspectRatio = aspectRatioSlider.value / 100;
     if (aspectRatio > 1) aspectRatio = 4 * aspectRatio - 3;
-    cropped.style.width = (aspectRatio < containerAspectRatio ? maxHeight * aspectRatio : maxWidth) + "px"
-    cropped.style.height = (aspectRatio < containerAspectRatio ? maxHeight : maxWidth / aspectRatio) + "px"
+    if (aspectRatio < containerAspectRatio) {
+        cropped.style.width = maxHeight * aspectRatio + "px";
+        cropped.style.height = maxHeight + "px";
+    } else {
+        cropped.style.width = maxWidth + "px";
+        cropped.style.height = maxWidth / aspectRatio + "px";
+    }
 });

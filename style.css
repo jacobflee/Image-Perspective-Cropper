@@ -1,5 +1,6 @@
 html,
-body {
+body,
+#image-upload {
     overflow: hidden;
 }
 
@@ -13,14 +14,14 @@ body {
 }
 
 #images-container {
+    padding: 8px;
     flex: 1;
     display: flex;
-    padding: 8px;
 }
 
 #images-container>* {
-    border: 1px solid gray;
     flex: 1;
+    border: 1px solid gray;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -31,12 +32,16 @@ body {
 #cropped {
     max-width: 100%;
     max-height: 100%;
-    height: auto;
     width: auto;
+    height: auto;
 }
 
 #crop-area {
     position: absolute;
+}
+
+#crop-coords {
+    fill: #00F4;
 }
 
 .crop-point {
@@ -46,26 +51,13 @@ body {
     border-radius: 50%;
 }
 
-#crop-coords {
-    fill: #00F4;
-}
-
 #info-container {
     padding: 8px;
     padding-top: 0;
 }
 
-#image-form,
-#aspect-ratio-container {
+#info-container>* {
     display: flex;
-}
-
-#image-upload {
-    overflow: hidden;
-}
-
-input {
-    font-family: "Fragment Mono";
 }
 
 #aspect-ratio-container {
@@ -74,6 +66,10 @@ input {
 
 #aspect-ratio-container>* {
     flex: 1;
+}
+
+input {
+    font-family: "Fragment Mono";
 }
 
 @media only screen and (orientation: landscape) {
@@ -90,13 +86,13 @@ input {
         display: flex;
     }
 
-    #image-form,
-    #aspect-ratio-container {
+    #info-container>*,
+    #image-form>* {
         flex: 1;
     }
 
-    #image-form>* {
-        flex: 1;
+    #image-upload {
+        flex: 2;
     }
 }
 
@@ -116,8 +112,8 @@ input {
     }
 
     #image-form {
-        justify-content: space-between;
         margin-bottom: 4px;
+        justify-content: space-between;
     }
 
     input {
