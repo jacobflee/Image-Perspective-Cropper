@@ -14,7 +14,8 @@ body {
 }
 
 #images-container {
-    padding: 8px;
+    margin: 8px;
+    margin-bottom: 0;
     flex: 1;
     display: flex;
 }
@@ -52,8 +53,7 @@ body {
 }
 
 #info-container {
-    padding: 8px;
-    padding-top: 0;
+    margin: 8px;
 }
 
 #info-container>* {
@@ -62,10 +62,6 @@ body {
 
 #aspect-ratio-container {
     visibility: hidden;
-}
-
-#aspect-ratio-container>* {
-    flex: 1;
 }
 
 input {
@@ -94,6 +90,10 @@ input {
     #image-upload {
         flex: 2;
     }
+
+    #aspect-ratio-container>* {
+        flex: 1;
+    }
 }
 
 @media only screen and (orientation: portrait) {
@@ -114,6 +114,11 @@ input {
     #image-form {
         margin-bottom: 4px;
         justify-content: space-between;
+    }
+
+    #aspect-ratio-slider {
+        margin-left: 16px;
+        flex: 1;
     }
 
     input {

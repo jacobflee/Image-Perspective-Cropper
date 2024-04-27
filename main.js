@@ -121,8 +121,8 @@ document.getElementById("image-form").onsubmit = (event) => {
     const h1 = Math.sqrt(Math.pow(points[2] - points[4], 2) + Math.pow(points[3] - points[5], 2));
     const h2 = Math.sqrt(Math.pow(points[0] - points[6], 2) + Math.pow(points[1] - points[7], 2));
     aspectRatio = (w1 + w2) / (h1 + h2);
-    if (aspectRatio > 1) aspectRatioSlider.value = 25 * aspectRatio + 75;
-    else aspectRatioSlider.value = 100 * aspectRatio;
+    if (aspectRatio < 1) aspectRatioSlider.value = (-25 / 2) * (Math.sqrt(105 - 96 * aspectRatio) - 11);
+    else aspectRatioSlider.value = (25 / 2) * (Math.sqrt(24 * aspectRatio - 15) + 5);
     const w = aspectRatio < 1 ? mat.rows * aspectRatio : mat.cols;
     const h = aspectRatio < 1 ? mat.rows : mat.cols / aspectRatio;
     const destination = cv.matFromArray(4, 2, cv.CV_32FC1, [0, 0, w, 0, w, h, 0, h]);
@@ -151,8 +151,8 @@ function croppedOnLoad() {
 }
 
 aspectRatioSlider.addEventListener("input", () => {
-    aspectRatio = aspectRatioSlider.value / 100;
-    if (aspectRatio > 1) aspectRatio = 4 * aspectRatio - 3;
+    if (aspectRatioSlider.value < 100) aspectRatio = (-1 / 15000) * (Math.pow(aspectRatioSlider.value, 2) - 275 * aspectRatioSlider.value + 2500);
+    else aspectRatio = (1 / 3750) * (Math.pow(aspectRatioSlider.value, 2) - 125 * aspectRatioSlider.value + 6250);
     cropped.style.width = (aspectRatio < containerAspectRatio ? maxHeight * aspectRatio : maxWidth) + "px"
     cropped.style.height = (aspectRatio < containerAspectRatio ? maxHeight : maxWidth / aspectRatio) + "px"
 });
