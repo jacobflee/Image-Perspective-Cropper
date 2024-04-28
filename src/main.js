@@ -132,13 +132,17 @@ function cropImage(userSetAspectRatio) {
     const points = cropCoords.getAttribute("points").split(/[\s,]/).map(value => scaleRatio * parseFloat(value));
     const source = cv.matFromArray(4, 2, cv.CV_32FC1, points);
     if (!userSetAspectRatio) setAspectRatio(points);
-    const w = aspectRatio < 1 ? maxHeight * aspectRatio : maxWidth;
-    const h = aspectRatio < 1 ? maxHeight : maxWidth / aspectRatio;
-    const destination = cv.matFromArray(4, 2, cv.CV_32FC1, [0, 0, w, 0, w, h, 0, h]);
+    let cropWidth = aspectRatio < 1 ? mat.rows * aspectRatio : mat.cols;
+    let cropHeight = aspectRatio < 1 ? mat.rows : mat.cols / aspectRatio;
+    if (cropWidth < maxWidth && cropHeight < maxHeight) {
+        cropWidth = aspectRatio < 1 ? maxHeight * aspectRatio : maxWidth;
+        cropHeight = aspectRatio < 1 ? maxHeight : maxWidth / aspectRatio;
+    }
+    const destination = cv.matFromArray(4, 2, cv.CV_32FC1, [0, 0, cropWidth, 0, cropWidth, cropHeight, 0, cropHeight]);
     const transform = cv.getPerspectiveTransform(source, destination);
     source.delete();
     destination.delete();
-    cv.warpPerspective(mat, mat, transform, new cv.Size(w, h));
+    cv.warpPerspective(mat, mat, transform, new cv.Size(cropWidth, cropHeight));
     transform.delete();
     const canvas = document.createElement("canvas");
     cv.imshow(canvas, mat);
