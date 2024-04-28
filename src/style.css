@@ -48,9 +48,8 @@ body {
 
 .crop-point {
     position: absolute;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
+    width: 6vmin;
+    height: 6vmin;
 }
 
 #info-container {
