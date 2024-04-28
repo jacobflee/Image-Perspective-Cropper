@@ -1,3 +1,7 @@
+const resizeOps = () => { document.documentElement.style.setProperty("--vh", window.innerHeight * 0.01 + "px") };
+resizeOps();
+window.addEventListener("resize", resizeOps);
+
 const imageContainers = document.querySelectorAll("#images-container>*");
 const image = document.getElementById("image");
 const cropArea = document.getElementById("crop-area");

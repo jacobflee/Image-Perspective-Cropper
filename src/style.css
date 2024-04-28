@@ -6,6 +6,7 @@ body,
 
 body {
     margin: 0;
+    height: calc(var(--vh, 0.86vh) * 100);
     background-color: black;
     color: white;
     font-family: "Fragment Mono";
@@ -70,10 +71,6 @@ input {
 
 @media only screen and (orientation: landscape) {
 
-    body {
-        height: 100vh;
-    }
-
     #images-container>:first-child {
         margin-right: 8px;
     }
@@ -99,7 +96,6 @@ input {
 @media only screen and (orientation: portrait) {
 
     body {
-        height: 86vh;
         font-size: 14px;
     }
 
